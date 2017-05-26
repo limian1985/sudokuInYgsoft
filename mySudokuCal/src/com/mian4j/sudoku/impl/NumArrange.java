@@ -12,7 +12,7 @@ public class NumArrange {
 	
 	private List<int[]> results2;
 	
-	public NumArrange( int n){
+	public NumArrange( final int n){
 		this.f= new boolean[n];
     	Arrays.fill(f, true);
     	this.results = new ArrayList<String>();
@@ -27,45 +27,60 @@ public class NumArrange {
 	} 
 	
     public static void main(final String[] args) {
-    	NumArrange ar = new NumArrange(3);
-    	int[] num={1,2,3};
-    	ar.arrangeNum(num);
-    	List results = ar.getResults();
+    	
+    	List<Integer>ls = new ArrayList<Integer>();
+    	int num =3;
+    	for(int i=0; i<num; i++){
+    		ls.add(i+1);
+    	}
+    	NumArrange ar = new NumArrange(num);
+    	List<int[]> results = ar.arrangeNum(ls);
     	System.out.println(results);
-    	List<int[]> results2 = ar.getResults2();
-    	for(int[] a : results2){
-//    		System.out.println(a);
-    		for(int b : a){
-    			System.out.print(b);
+    	for(int[] a : results){
+    		for(int v : a){
+    			System.out.print(v);
     		}
     		System.out.println();
     	}
-    	
-    	
-    	
-//    	String str="";
-//    	count(num,str,num.length);
     }
-    /**
-     * 
-     * @param num 表示要排列的数组
-     * @param str 以排列好的字符串
-     * @param nn  剩下需要排列的个数，如果需要全排列，则nn为数组长度
-     */
-//    private static void count(final int[] num, final String str, final int nn) {
-//        if(nn==0){
-//            System.out.println(str);
-//            return;
-//        }
-//        for(int i=0;i<num.length;i++){
-//            if(!f[i]){
-//                continue;
-//            }
-//            f[i]=false;
-//            count(num,str+num[i],nn-1);
-//            f[i]=true;
-//        }
-//    }
+    
+    public List<int []> arrangeNum( final List<Integer> sourceArr){
+    	String str = "";
+    	int num = sourceArr.size();
+    	this.count1(sourceArr, str, num);
+    	this.results2.clear();
+    	
+    	if(this.results.size()>0){
+    		int i =0;
+    		for(String s : results){
+    			int[] arr = new int[num];
+    			for(i=0; i<num; i++){
+    				String v = s.substring(i, i+1);
+    				arr[i] = Integer.parseInt(v);
+    			}
+    			results2.add(arr);
+    		}
+    	}
+    	return this.results2;
+    	
+    }
+    
+    private void count1(final List<Integer> num, final String str, final int nn) {
+        if(nn==0){
+            //System.out.println(str);
+            this.results.add(str);
+            return;
+        }
+        for(int i=0;i<num.size();i++){
+            if(!f[i]){
+                continue;
+            }
+            f[i]=false;
+//            System.out.println(i+":"+str);
+            count1(num,str+num.get(i),nn-1);
+            f[i]=true;
+        }
+    }
     
     private void count2(final int[] num, final String str, final int nn) {
         if(nn==0){
@@ -79,7 +94,7 @@ public class NumArrange {
             }
             f[i]=false;
 //            System.out.println(i+":"+str);
-            count2(num,str+num[i]+",",nn-1);
+            count2(num,str+num[i],nn-1);
             f[i]=true;
         }
     }
@@ -101,14 +116,9 @@ public class NumArrange {
         }
     }
     
-    public void arrangeNum( final int[] sourceArr){
-    	String str = "";
-    	this.count2(sourceArr, str, sourceArr.length);
-    	int [] arr = new  int [sourceArr.length];
-    	this.count3(sourceArr, arr, sourceArr.length);
-    }
+   
     
-    private int[] fillArr(int [] sour, int v){
+    private int[] fillArr(final int [] sour, final int v){
     	int i=0;
     	for(i=0;i<sour.length; i++){
     		if(sour[i]==0){

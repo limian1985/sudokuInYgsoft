@@ -49,7 +49,7 @@ public class CurProcessElement {
 		return sudokuIndexList;
 	}
 
-	public void setSudokuIndexList(List<Integer> sudokuIndexList) {
+	public void setSudokuIndexList(final List<Integer> sudokuIndexList) {
 		this.sudokuIndexList = sudokuIndexList;
 	}
 

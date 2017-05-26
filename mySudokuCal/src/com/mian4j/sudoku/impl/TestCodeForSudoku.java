@@ -18,19 +18,18 @@ public class TestCodeForSudoku {
 //		System.out.println(result_up);
 //		System.out.println(result_floor);
 //		System.out.println(result_down);
-		int sum =0;
-		for(int i=1;i<=9;i++){
-			sum+=i;
-		}
-		System.out.println(sum);
-		String a = "1,2,3,";
-		String[] b = a.split(",");
-		System.out.println(b.length);
-		for(int i=0;i<b.length;i++){
-			System.out.println(b[i]);
+		
+		String a ="123";
+		for(int i=0;i<a.length();i++){
+			System.out.println(a.substring(i,i+1));
 		}
 		
 		
+//		int sum =0;
+//		for(int i=1;i<=9;i++){
+//			sum+=i;
+//		}
+//		System.out.println(sum);
 		
 		
 //		String a = "[12]";

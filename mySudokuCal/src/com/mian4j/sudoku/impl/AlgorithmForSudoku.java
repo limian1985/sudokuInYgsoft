@@ -25,9 +25,7 @@ public class AlgorithmForSudoku {
 	
 	public static void main(final String[] args) {
 		AlgorithmForSudoku sudoAl = new AlgorithmForSudoku();
-//		System.out.println("获取行维度第一个单元数组");
-//		List<Integer>rowUnit = sudoAl.getRowIndexMap().get(0);
-//		System.out.println(rowUnit);
+
 		int[] sudoku = {8,0,0,0,0,0,0,0,0,
 				0,0,3,6,0,0,0,0,0,
 				0,7,0,0,9,0,2,0,0,
@@ -38,6 +36,7 @@ public class AlgorithmForSudoku {
 				0,0,8,5,0,0,0,1,0,
 				0,9,0,0,0,0,4,0,0
 		};
+		
 		long s = System.currentTimeMillis();
 		List<int[]> rs = sudoAl.getResults(sudoku);
 		for(int[] sudo : rs){
@@ -45,36 +44,18 @@ public class AlgorithmForSudoku {
 		}
 		long e = System.currentTimeMillis();
 		long time = (e-s);
-		System.out.println("总耗时间为："+time+" 豪秒");
-//		int num;
-//		System.out.println("行纬度所在位置");
-//		for(int i=0;i<81;i++){
-//			num = sudoAl.getRowPosOfIndex(i);
-//			System.out.print(num);
-//			System.out.print(",");
-//			if((i+1)%9==0){
-//				System.out.println("");
-//			}
-//		}
-//		System.out.println("列纬度所在位置");
-//		for(int i=0;i<81;i++){
-//			num = sudoAl.getColPosOfIndex(i);
-//			System.out.print(num);
-//			System.out.print(",");
-//			if((i+1)%9==0){
-//				System.out.println("");
-//			}
-//		}
-//		System.out.println("块纬度所在位置");
-//		for(int i=0;i<81;i++){
-//			num = sudoAl.getBoxPosOfIndex(i);
-//			System.out.print(num);
-//			System.out.print(",");
-//			if((i+1)%9==0){
-//				System.out.println("");
-//			}
-//		}
-
+		
+		System.out.println("调用方法计算sudoAl.getResults_Sec");
+		long s2 = System.currentTimeMillis();
+		List<int[]> rs2 = sudoAl.getResults_Sec(sudoku);
+		for(int[] sudo : rs2){
+			sudoAl.printArray(sudo);
+		}
+		long e2 = System.currentTimeMillis();
+		long time2 = (e2-s2);
+		System.out.println("总耗时间为1："+time+" 豪秒");
+		System.out.println("总耗时间为2："+time2+" 豪秒");
+		
 	}
 	private Map<Integer,List<Integer>>rowIndexMap;
 	private Map<Integer,List<Integer>>colIndexMap;
@@ -547,7 +528,7 @@ public class AlgorithmForSudoku {
 		return curEl;
 	}
 	
-	private void printProcessInfo(int [] sudoku,CurProcessElement curEl){
+	private void printProcessInfo(final int [] sudoku,final CurProcessElement curEl){
 		if( 1==log ){
 			System.out.println("当前数独数组为：");
 			this.printArray(sudoku);
@@ -636,27 +617,56 @@ public class AlgorithmForSudoku {
 		this.printProcessInfo(sudoku, curEl);
 		
 		//2、根据curEl中的 待计算的数独数组索引curEl.getSudokuIndexList() 和 侯选择值curEl.getValues()，组合出该单元数组的可能解
-		int type = curEl.getType();
-		
-			for(Integer value : curEl.getValues()) {
-				// 2、判断当前value值是否符合规则，如果符合规则，
-				//那么拷贝传入的sudoku，生成新的数独数组，填入该值,并判断该数独数组是否已经解完
-				boolean result = this.isRightValue(sudoku, curEl.getType(), curEl.getSudokuIndex(), value);
-//				System.out.println("计算结果"+ value +":" + result);
-				if(result){
-					int[] newSudoku = this.copyArray(sudoku);
-					newSudoku[curEl.getSudokuIndex()] = value;
+		int unitType = curEl.getType();
+		List<Integer> values = curEl.getValues();
+		int count = values.size();
+		if(count == 1){
+			int value = values.get(0);
+			int sudokuIndex = curEl.getSudokuIndex();
+			this.doProcessElValue (sudoku, unitType, sudokuIndex, value, results, nextProcessList);
+		}else{
+			final NumArrange numArrange = new NumArrange(count);
+	    	List<int[]> valueArrayList = numArrange.arrangeNum(values);
+	    	List<Integer>sudokuIndexs = curEl.getSudokuIndexList();
+	    	int i =0;
+	    	Map<Integer,Integer>wrongVmap = new HashMap<Integer,Integer>();
+	    	for(int [] vArr : valueArrayList){
+	    		boolean isRight = true;
+	    		for(i=0; i<count; i++ ){
+	    			int value = vArr[i];
+	    			int sudokuIndex = sudokuIndexs.get(i);
+	    			
+	    			if(wrongVmap.get(sudokuIndex)!=null){
+	    				int wrongV = wrongVmap.get(sudokuIndex);
+	    				if(wrongV == value){
+		    				isRight = false;
+		    				break;
+		    			}
+	    			}
+	    			
+	    			boolean result = this.isRightValue(sudoku, unitType, sudokuIndex, value);
+	    			if(result == false){
+	    				isRight = false;
+	    				wrongVmap.put(sudokuIndex, value);
+	    				break;
+	    			}
+	    		}
+	    		if(isRight == true){
+	    			int[] newSudoku = this.copyArray(sudoku);
+	    			for(i=0; i<count; i++ ){
+	    				int value = vArr[i];
+		    			int sudokuIndex = sudokuIndexs.get(i);
+		    			newSudoku[sudokuIndex] = value;
+	    			}
 					boolean completed = this.isCompleted(newSudoku);
 					if(completed){
 						results.add(newSudoku);
 					}else{
 						nextProcessList.add(newSudoku);
 					}
-				}
-			}
-			
-		
-		
+	    		}
+	    	}
+		}
 		int num = nextProcessList.size();
 		if(num > 0) {
 			//递归计算
@@ -670,4 +680,20 @@ public class AlgorithmForSudoku {
 		}
 		return results;
 	}
+	
+	private void doProcessElValue (final int[]sudoku, final int unitType, final int sudokuIndex, final int value,
+			final List<int[]>results, final List<int[]>nextProcessList) {
+		boolean result = this.isRightValue(sudoku, unitType, sudokuIndex, value);
+		if(result){
+			int[] newSudoku = this.copyArray(sudoku);
+			newSudoku[sudokuIndex] = value;
+			boolean completed = this.isCompleted(newSudoku);
+			if(completed){
+				results.add(newSudoku);
+			}else{
+				nextProcessList.add(newSudoku);
+			}
+		}
+	}
+	
 }
